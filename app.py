@@ -18,7 +18,7 @@ dp = Dispatcher(storage=storage)
 
 def get_main_keyboard():
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="🚗 Заказать трансфер", web_app=WebAppInfo(url=os.getenv("WEBAPP_URL")))]],
+        keyboard=[[KeyboardButton(text="🚗 Заказать трансфер", web_app=WebAppInfo(url="https://" + os.getenv("WEBAPP_URL")))]],
         resize_keyboard=True,
     )
 
