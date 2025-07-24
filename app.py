@@ -34,8 +34,8 @@ async def start_handler(message: Message):
 @dp.message(F.content_type == ContentType.WEB_APP_DATA)
 async def web_app_handler(message: Message):
     data = message.web_app_data.data
-    parsed_data = parse_order(data)
-    order_id = await create_order(parsed_data, message.from_user.id)
+    parsed_data = parse_order(data, message.from_user.id)
+    order_id = await create_order(parsed_data)
     await message.answer(f"✅ Ваш заказ №{order_id} принят! Обработка может занять до 5 минут.")
     await bot.send_message(os.getenv("ADMIN_ID"), data)
 
