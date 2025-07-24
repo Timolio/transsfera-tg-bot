@@ -22,7 +22,7 @@ load_dotenv()
 MONGO_URL = os.getenv("MONGO_URL")
 DATABASE_NAME = os.getenv("DATABASE_NAME")
 
-bot = Bot(token=os.getenv("DEV_BOT_TOKEN"), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=os.getenv("BOT_TOKEN"), default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 
