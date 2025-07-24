@@ -10,7 +10,12 @@ from aiogram.types import (
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.storage.memory import MemoryStorage
 
+from db.service.orders import parse_order, create_order
+
 load_dotenv()
+
+MONGO_URL = os.getenv("MONGO_URL")
+DATABASE_NAME = os.getenv("DATABASE_NAME")
 
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 storage = MemoryStorage()
@@ -29,7 +34,10 @@ async def start_handler(message: Message):
 @dp.message(F.content_type == ContentType.WEB_APP_DATA)
 async def web_app_handler(message: Message):
     data = message.web_app_data.data
-    await message.answer(f"Received data from web app: {data}")
+    parsed_data = parse_order(data)
+    order_id = await create_order(parsed_data, message.from_user.id)
+    await message.answer(f"✅ Ваш заказ №{order_id} принят! Обработка может занять до 5 минут.")
+    await bot.send_message(os.getenv("ADMIN_ID"), data)
 
 async def main():
     logging.basicConfig(level=logging.INFO)
