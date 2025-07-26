@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import (
-    Message, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, ContentType, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-
+    Message, ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, ContentType, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, FSInputFile
 )
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
@@ -52,10 +51,10 @@ def format_order(order: OrderModel, has_price_question: bool = False) -> str:
     )
 
     if (order.price):
-        formatted += f"\n\n💰 Стоимость трансфера составляет <b>{order.price}€</b>."
+        formatted += f"\n\n💰 <i>Стоимость трансфера составляет <b>{order.price}€</b>.</i>"
     
     if (not has_price_question):
-        formatted += " Подтверждаете заказ?"
+        formatted += " <b><i>Подтверждаете заказ?</i></b>"
     
     return formatted
 
@@ -74,17 +73,31 @@ def get_main_keyboard():
         one_time_keyboard=True
     )
 
-def get_price_button(order_id: str) -> InlineKeyboardMarkup:
+def get_admin_buttons(order_id: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💰 Дать цену", callback_data=f"set_price:{order_id}")]
+        [
+            InlineKeyboardButton(text="💰 Дать цену", callback_data=f"set_price:{order_id}"),
+            InlineKeyboardButton(text="❌ Отказаться", callback_data=f"admin_decline:{order_id}")
+        ]
     ])
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
-    await message.answer(
-        f"👋 Добро пожаловать, @{message.from_user.username}! Это бот <b>Transsfera</b>. \n\nЗдесь ты можешь быстро и удобно заказать трансфер по всему побережью <i>Costa Blanca</i>, в том числе по аэропортам Аликанте, Валенсии и Барселоны.\n\nВведите данные по <b>кнопке внизу</b>, после чего бот рассчитает цену поездки. Останется только подтвердить заказ и... Приятной поездки!",
-        reply_markup=get_main_keyboard()
+    photo_path = "assets/banner.jpg"
+    caption = (
+        f"👋 Добро пожаловать, @{message.from_user.username}! Это бот <b>Transsfera</b>. \n\n"
+        "Здесь ты можешь быстро и удобно заказать трансфер по всему побережью <i>Costa Blanca</i>, "
+        "в том числе в/из аэропорта Аликанте, Валенсии и Барселоны ✈️\n\n"
+        "Введите данные по <b>кнопке внизу</b> ⬇️⬇️⬇️, после чего бот рассчитает цену поездки. "
+        "Останется только подтвердить заказ ✅ и... Приятной поездки!"
     )
+    with open(photo_path, "rb") as photo:
+        await message.answer_photo(
+            photo=FSInputFile(path=photo_path),
+            caption=caption,
+            reply_markup=get_main_keyboard(),
+            parse_mode=ParseMode.HTML
+        )
 
 @dp.message(PriceStates.waiting_for_price)
 async def receive_price(message: Message, state: FSMContext):
@@ -96,15 +109,27 @@ async def receive_price(message: Message, state: FSMContext):
 
     data = await state.get_data()
     order_id = data["order_id"]
+    admin_message_id = data.get("admin_message_id")
 
     order = await update_order(order_id, {"price": price})
 
     formatted = format_order(order)
     await bot.send_message(
         order.tg_id,
-        f"🚖 Ваш заказ <b>№{order.public_id}</b>\n\n{formatted}",
+        f"🚖 Ваш заказ <b>№{order.public_id}</b>.\n\n{formatted}",
         reply_markup=get_price_accept_buttons(order_id)
     )
+
+    if admin_message_id:
+        try:
+            await bot.edit_message_text(
+                chat_id=os.getenv("ADMIN_ID"),
+                message_id=admin_message_id,
+                text=f"🎉 Новый заказ <b>№{order.public_id}</b>!\n\n{formatted}\n\n✅ <i>Вы назначили цену в <b>{price}€</b>.</i>",
+                reply_markup=None
+            )
+        except Exception as e:
+            pass
 
     await message.answer("✅ Цена отправлена клиенту.")
     await state.clear()
@@ -121,7 +146,7 @@ async def handle_accept_price(callback: CallbackQuery):
     await callback.message.edit_reply_markup()
 
     # Клиенту
-    await callback.message.answer("✅ Отлично! Водитель свяжется с вами в течение 5 минут для подтверждения.")
+    await callback.message.answer("✅ Отлично! Водитель свяжется с вами в течение 15 минут.")
 
     # Админу
     await bot.send_message(
@@ -150,9 +175,32 @@ async def set_price_callback(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer(f"❌ Вы уже определили цену в <b>{order.price}€</b> для этого заказа!")
         await callback.answer()
         return
-    await state.update_data(order_id=order_id)
+    await state.update_data(order_id=order_id, admin_message_id=callback.message.message_id)
     await callback.message.answer("Введите цену для этого заказа:")
     await state.set_state(PriceStates.waiting_for_price)
+    await callback.answer()
+
+@dp.callback_query(F.data.startswith("admin_decline:"))
+async def handle_admin_decline(callback: CallbackQuery):
+    order_id = callback.data.split(":")[1]
+    
+    order = await get_order(order_id)
+    if not order:
+        await callback.message.answer("⚠️ Заказ не найден.")
+        await callback.answer()
+        return
+
+    await delete_order(order_id)
+
+    await callback.message.edit_reply_markup()
+
+    await callback.message.answer(f"❌ Заказ <b>№{order.public_id}</b> отклонен.")
+
+    await bot.send_message(
+        order.tg_id,
+        f"😔 К сожалению, на дату <b>{order.date}</b> в <b>{order.time}</b> свободных машин нет."
+    )
+
     await callback.answer()
 
 @dp.message(F.content_type == ContentType.WEB_APP_DATA)
@@ -162,7 +210,7 @@ async def web_app_handler(message: Message):
     order_id = await create_order(parsed_order)
     await message.answer(f"✅ Ваш заказ <b>№{parsed_order.public_id}</b> принят! Обработка может занять до 5 минут.")
     formatted = format_order(parsed_order, True)
-    await bot.send_message(os.getenv("ADMIN_ID"), f"🎉 Новый заказ <b>№{parsed_order.public_id}</b>:\n\n{formatted}", reply_markup=get_price_button(order_id=str(order_id)), )
+    await bot.send_message(os.getenv("ADMIN_ID"), f"🎉 Новый заказ <b>№{parsed_order.public_id}</b>!\n\n{formatted}", reply_markup=get_admin_buttons(order_id=str(order_id)), )
 
 async def main():
     logging.basicConfig(level=logging.INFO)

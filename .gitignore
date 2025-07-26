@@ -1,5 +1,7 @@
 .venv
 
+__pycache__
+
 # Local env files
 .env
 .env.*
