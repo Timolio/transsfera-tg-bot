@@ -30,22 +30,32 @@ class PriceStates(StatesGroup):
     waiting_for_price = State()
 
 def format_order(order: OrderModel, has_price_question: bool = False) -> str:
+    messengers = []
+    if order.hasViber:
+        messengers.append("Viber")
+    if order.hasTelegram:
+        messengers.append("Telegram")
+    if order.hasWhatsApp:
+        messengers.append("WhatsApp")
+    messengers_str = f" ({', '.join(messengers)})" if messengers else ""
+
     formatted = (
         f"<b>📅 Дата и время: {order.date}, {order.time}</b>\n\n"
         f"📍 Откуда: <blockquote>{order.from_location}</blockquote>\n"
         f"📍 Куда: <blockquote>{order.to_location}</blockquote>\n\n"
         f"👤 Имя: {order.name}\n"
         f"<a href='tg://user?id={order.tg_id}'>🤖 Telegram-профиль заказчика</a>\n\n"
-        f"📞 Телефон: {order.phone}\n\n"
+        f"📞 Телефон: {order.phone}{messengers_str}\n\n"
         f"👨‍👩‍👧‍👦 Всего пассажиров: <b>{order.adults + order.children}</b>\n"
-        f"(из них до 12 лет: <b>{order.children}</b>)"
+        f"(из них до 12 лет: <b>{order.children}</b>)\n\n"
+        f"🧳 Багажа: <b>{order.baggage}</b>"
     )
 
     if (order.price):
         formatted += f"\n\n💰 Стоимость трансфера составляет <b>{order.price}€</b>."
     
     if (not has_price_question):
-        formatted += " Подходит ли вам эта цена?"
+        formatted += " Подтверждаете заказ?"
     
     return formatted
 
@@ -72,7 +82,7 @@ def get_price_button(order_id: str) -> InlineKeyboardMarkup:
 @dp.message(CommandStart())
 async def start_handler(message: Message):
     await message.answer(
-        "👋 Добро пожаловать!\n\nЭто бот трансферной компании Transsfera. Мы работаем в Испании: Аликанте, Барселона, Валенсия.\n\nЗдесь вы можете быстро заказать трансфер.",
+        f"👋 Добро пожаловать, @{message.from_user.username}! Это бот <b>Transsfera</b>. \n\nЗдесь ты можешь быстро и удобно заказать трансфер по всему побережью <i>Costa Blanca</i>, в том числе по аэропортам Аликанте, Валенсии и Барселоны.\n\nВведите данные по <b>кнопке внизу</b>, после чего бот рассчитает цену поездки. Останется только подтвердить заказ и... Приятной поездки!",
         reply_markup=get_main_keyboard()
     )
 

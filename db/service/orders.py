@@ -17,6 +17,10 @@ class OrderModel(BaseModel):
     to_location: str
     adults: int
     children: int
+    baggage: int
+    hasWhatsApp: bool
+    hasTelegram: bool
+    hasViber: bool
     price: Optional[int] = None
     created_at: Optional[datetime] = None
     accepted: bool
