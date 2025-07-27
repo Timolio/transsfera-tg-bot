@@ -86,10 +86,10 @@ async def start_handler(message: Message):
     photo_path = "assets/banner.jpg"
     caption = (
         f"👋 Добро пожаловать, @{message.from_user.username}! Это бот <b>Transsfera</b>. \n\n"
-        "Здесь ты можешь быстро и удобно заказать трансфер по всему побережью <i>Costa Blanca</i>, "
-        "в том числе в/из аэропорта Аликанте, Валенсии и Барселоны ✈️\n\n"
-        "Введите данные по <b>кнопке внизу</b> ⬇️⬇️⬇️, после чего бот рассчитает цену поездки. "
-        "Останется только подтвердить заказ ✅ и... Приятной поездки!"
+        "Здесь вы можете быстро и удобно заказать трансфер по всему побережью <i>Costa Blanca</i>, "
+        "в том числе в аэропорты Аликанте, Валенсии и Барселоны ✈️\n\n"
+        "Введите данные по <b>кнопке внизу</b> ⬇️⬇️⬇️, после чего бот рассчитает вашу цену поездки. "
+        "Останется только подтвердить заказ ✅ и... Приятного пути!"
     )
     with open(photo_path, "rb") as photo:
         await message.answer_photo(
@@ -116,7 +116,7 @@ async def receive_price(message: Message, state: FSMContext):
     formatted = format_order(order)
     await bot.send_message(
         order.tg_id,
-        f"🚖 Ваш заказ <b>№{order.public_id}</b>.\n\n{formatted}",
+        f"🚖 Ваш заказ <b>#{order.public_id}</b>\n\n{formatted}",
         reply_markup=get_price_accept_buttons(order_id)
     )
 
@@ -125,7 +125,7 @@ async def receive_price(message: Message, state: FSMContext):
             await bot.edit_message_text(
                 chat_id=os.getenv("ADMIN_ID"),
                 message_id=admin_message_id,
-                text=f"🎉 Новый заказ <b>№{order.public_id}</b>!\n\n{formatted}\n\n✅ <i>Вы назначили цену в <b>{price}€</b>.</i>",
+                text=f"🎉 Новый заказ <b>#{order.public_id}</b>\n\n{formatted}\n\n✅ <i>Вы назначили цену в <b>{price}€</b>.</i>",
                 reply_markup=None
             )
         except Exception as e:
@@ -151,7 +151,7 @@ async def handle_accept_price(callback: CallbackQuery):
     # Админу
     await bot.send_message(
         os.getenv("ADMIN_ID"),
-        f"✅ Клиент подтвердил заказ <b>№{order.public_id}</b>.\n\n"
+        f"✅ Клиент подтвердил заказ <b>#{order.public_id}</b>\n\n"
         f"{format_order(order, True)}\n\n#подтверждённые_заказы"
     )
 
@@ -198,7 +198,7 @@ async def handle_admin_decline(callback: CallbackQuery):
 
     await bot.send_message(
         order.tg_id,
-        f"😔 К сожалению, на дату <b>{order.date}</b> в <b>{order.time}</b> свободных машин нет."
+        f"🚖 Ваш заказ <b>#{order.public_id}</b>\n\n😔 К сожалению, на дату <b>{order.date}</b> в <b>{order.time}</b> свободных машин нет."
     )
 
     await callback.answer()
@@ -208,9 +208,9 @@ async def web_app_handler(message: Message):
     data = message.web_app_data.data
     parsed_order = parse_order(data, message.from_user.id)
     order_id = await create_order(parsed_order)
-    await message.answer(f"✅ Ваш заказ <b>№{parsed_order.public_id}</b> принят! Обработка может занять до 5 минут.")
+    await message.answer(f"✅ Ваш заказ <b>#{parsed_order.public_id}</b> принят! Обработка может занять до 5 минут.")
     formatted = format_order(parsed_order, True)
-    await bot.send_message(os.getenv("ADMIN_ID"), f"🎉 Новый заказ <b>№{parsed_order.public_id}</b>!\n\n{formatted}", reply_markup=get_admin_buttons(order_id=str(order_id)), )
+    await bot.send_message(os.getenv("ADMIN_ID"), f"🎉 Новый заказ <b>#{parsed_order.public_id}</b>\n\n{formatted}", reply_markup=get_admin_buttons(order_id=str(order_id)), )
 
 async def main():
     logging.basicConfig(level=logging.INFO)
