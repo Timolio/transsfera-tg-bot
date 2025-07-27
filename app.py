@@ -43,7 +43,7 @@ def format_order(order: OrderModel, has_price_question: bool = False) -> str:
         f"📍 Откуда: <blockquote>{order.from_location}</blockquote>\n"
         f"📍 Куда: <blockquote>{order.to_location}</blockquote>\n\n"
         f"👤 Имя: {order.name}\n"
-        f"<a href='tg://user?id={order.tg_id}'>🤖 Telegram-профиль заказчика</a>\n\n"
+        # f"<a href='tg://user?id={order.tg_id}'>🤖 Telegram-профиль заказчика</a>\n\n"
         f"📞 Телефон: {order.phone}{messengers_str}\n\n"
         f"👨‍👩‍👧‍👦 Всего пассажиров: <b>{order.adults + order.children}</b>\n"
         f"(из них до 12 лет: <b>{order.children}</b>)\n\n"

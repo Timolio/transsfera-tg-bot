@@ -2,6 +2,7 @@ from ..connect import orders_collection
 from typing_extensions import Optional
 import json
 import random
+import string
 from datetime import datetime, timezone
 from pydantic import BaseModel, ValidationError
 from bson import ObjectId
@@ -26,7 +27,9 @@ class OrderModel(BaseModel):
     accepted: bool
 
 def generate_public_id(length: int = 6) -> str:
-    return ''.join(random.choices('0123456789', k=length))
+    first_char = random.choice(string.ascii_uppercase)
+    rest = ''.join(random.choices('0123456789', k=length))
+    return first_char + rest
 
 def parse_order(json_string: str, tg_id: int) -> OrderModel:
     try:
