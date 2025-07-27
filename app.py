@@ -91,13 +91,13 @@ async def start_handler(message: Message):
         "Введите данные по <b>кнопке внизу</b> ⬇️⬇️⬇️, после чего бот рассчитает цену вашей поездки. "
         "Вам останется только подтвердить заказ ✅ и... Приятного пути!"
     )
-    with open(photo_path, "rb") as photo:
-        await message.answer_photo(
-            photo=FSInputFile(path=photo_path),
-            caption=caption,
-            reply_markup=get_main_keyboard(),
-            parse_mode=ParseMode.HTML
-        )
+    logging.info(f"User {message.from_user.id} opened the bot")
+    await message.answer_photo(
+        photo=FSInputFile(path=photo_path),
+        caption=caption,
+        reply_markup=get_main_keyboard(),
+        parse_mode=ParseMode.HTML
+    )
 
 @dp.message(PriceStates.waiting_for_price)
 async def receive_price(message: Message, state: FSMContext):
