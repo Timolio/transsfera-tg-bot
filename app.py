@@ -210,6 +210,7 @@ async def web_app_handler(message: Message):
     order_id = await create_order(parsed_order)
     await message.answer(f"✅ Ваш заказ <b>#{parsed_order.public_id}</b> принят! Обработка может занять до 5 минут.")
     formatted = format_order(parsed_order, True)
+    logging.info(f"New order {order_id}")
     await bot.send_message(os.getenv("ADMIN_ID"), f"🎉 Новый заказ <b>#{parsed_order.public_id}</b>\n\n{formatted}", reply_markup=get_admin_buttons(order_id=str(order_id)), )
 
 async def main():
