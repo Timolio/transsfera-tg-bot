@@ -91,7 +91,7 @@ async def start_handler(message: Message):
         "Введите данные по <b>кнопке внизу</b> ⬇️⬇️⬇️, после чего бот рассчитает цену вашей поездки. "
         "Вам останется только подтвердить заказ ✅ и... Приятного пути!"
     )
-    logging.info(f"User {message.from_user.id} opened the bot")
+    logging.info(f"User {message.from_user.id} ({message.from_user.username}) opened the bot")
     await message.answer_photo(
         photo=FSInputFile(path=photo_path),
         caption=caption,
