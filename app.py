@@ -168,7 +168,7 @@ async def handle_decline_price(callback: CallbackQuery):
     await callback.message.edit_reply_markup()
     await callback.message.answer("😔 Очень жаль! Возвращайтесь в любое время, мы будем ждать вас снова.")
 
-    await bot.send_message(os.getenv("ADMIN_ID"), f"😔 Клиент отказался от заказа #{order.public_id}")
+    await bot.send_message(os.getenv("ADMIN_ID"), f"😔 Клиент не подтвердил заказ #{order.public_id}")
 
     await callback.answer()
 
