@@ -112,6 +112,9 @@ async def receive_price(message: Message, state: FSMContext):
     admin_message_id = data.get("admin_message_id")
 
     order = await update_order(order_id, {"price": price})
+    if order is None:
+        await message.answer("⚠️ Заказ не найден.")
+        return
 
     formatted = format_order(order)
     await bot.send_message(
@@ -139,8 +142,9 @@ async def handle_accept_price(callback: CallbackQuery):
     order_id = callback.data.split(":")[1]
 
     order = await update_order(order_id, {"accepted": True})
-    if not order:
+    if order is None:
         await callback.message.answer("⚠️ Заказ не найден.")
+        await callback.answer()
         return
 
     await callback.message.edit_reply_markup()
@@ -161,27 +165,41 @@ async def handle_accept_price(callback: CallbackQuery):
 async def handle_decline_price(callback: CallbackQuery):
     order_id = callback.data.split(":")[1]
 
+    logging.info(f"Attempting to decline order: {order_id}")
+
     order = await get_order(order_id)
+    if not order:
+        logging.warning(f"Order not found: {order_id}")
+        await callback.message.answer("⚠️ Заказ не найден.")
+        await callback.answer()
+        return
 
     await delete_order(order_id)
 
     await callback.message.edit_reply_markup()
     await callback.message.answer("😔 Очень жаль! Возвращайтесь в любое время, мы будем ждать вас снова.")
 
-    await bot.send_message(os.getenv("ADMIN_ID"), f"😔 Клиент не подтвердил заказ #{order.public_id}")
+    await bot.send_message(os.getenv("ADMIN_ID"), f"😔 Клиент не подтвердил заказ #{order.public_id}.")
 
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("set_price:"))
 async def set_price_callback(callback: CallbackQuery, state: FSMContext):
     order_id = callback.data.split(":")[1]
+
     order = await get_order(order_id)
+    if not order:
+        await callback.message.answer("⚠️ Заказ не найден.")
+        await callback.answer()
+        return
+
     if order.price:
         await callback.message.answer(f"❌ Вы уже определили цену в <b>{order.price}€</b> для этого заказа!")
         await callback.answer()
         return
+    
     await state.update_data(order_id=order_id, admin_message_id=callback.message.message_id)
-    await callback.message.answer("Введите цену для этого заказа:")
+    await callback.message.answer(f"💰 Введите цену для заказа #{order.public_id}...")
     await state.set_state(PriceStates.waiting_for_price)
     await callback.answer()
 
@@ -199,7 +217,7 @@ async def handle_admin_decline(callback: CallbackQuery):
 
     await callback.message.edit_reply_markup()
 
-    await callback.message.answer(f"❌ Заказ <b>№{order.public_id}</b> отклонен.")
+    await callback.message.answer(f"❌ Заказ <b>#{order.public_id}</b> отклонён.")
 
     await bot.send_message(
         order.tg_id,

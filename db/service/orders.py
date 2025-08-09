@@ -48,6 +48,8 @@ async def create_order(order: OrderModel) -> None:
 
 async def get_order(order_id: str) -> OrderModel:
     result = await orders_collection.find_one({"_id": ObjectId(order_id)})
+    if result is None:
+        return None
     return OrderModel(**result)
 
 async def update_order(order_id: str, update_data: dict) -> OrderModel | None:
@@ -56,6 +58,8 @@ async def update_order(order_id: str, update_data: dict) -> OrderModel | None:
         {"$set": update_data},
         return_document=True,
     )
+    if result is None:
+        return None
     return OrderModel(**result)
 
 async def delete_order(order_id: str) -> bool:
