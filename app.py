@@ -131,7 +131,7 @@ async def handle_accept_price(callback: CallbackQuery):
     formatted_admin = format_for_admin(order)
     await bot.send_message(
         os.getenv("ADMIN_ID"),
-        f"🎊 ПОДТВЕРЖДЁН! <b>#{order.public_id}</b>\n\n✅  Клиент @alex_petrov принял цену {order.price}€\n\n"
+        f"🎊 ПОДТВЕРЖДЁН! <b>#{order.public_id}</b>\n\n✅  Клиент @{order.username} принял цену {order.price}€\n\n"
         f"{formatted_admin}\n\n#подтверждённые_заказы"
     )
 
