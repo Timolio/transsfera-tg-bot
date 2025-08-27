@@ -151,7 +151,7 @@ async def handle_decline_price(callback: CallbackQuery):
     await delete_order(order_id)
     await callback.message.edit_reply_markup()
     await callback.message.answer("😔  Очень жаль! Возвращайтесь в любое время, мы будем ждать вас снова.")
-    await bot.send_message(os.getenv("ADMIN_ID"), f"💔  Отказ от <b>#TR001</b>\n\n❌  @{order.username} не подтвердил цену 85€")
+    await bot.send_message(os.getenv("ADMIN_ID"), f"💔  Отказ от <b>#TR001</b>\n\n❌  @{order.username} не подтвердил цену {order.price}€")
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("set_price:"))
