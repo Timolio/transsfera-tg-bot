@@ -90,7 +90,7 @@ async def receive_price(message: Message, state: FSMContext):
     formatted_client = format_for_client(order, include_confirmation=True)
     await bot.send_message(
         order.tg_id,
-        f"💎  Ваш трансфер готов! <b>{order.public_id}\n\n{formatted_client}</b>",
+        f"💎  Ваш трансфер готов! <b>#{order.public_id}</b>\n\n{formatted_client}",
         reply_markup=get_price_accept_buttons(order_id)
     )
 

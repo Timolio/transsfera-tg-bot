@@ -85,6 +85,6 @@ def format_for_admin(order: OrderModel, extra_info: str = None) -> str:
         formatted += f"━━━━━━━━━━━━━━━━\n💰  <b>Стоимость: {order.price}€</b>"
 
     if extra_info:
-        formatted += f"\n\n{extra_info}"
+        formatted += f"{extra_info}"
     
     return formatted
