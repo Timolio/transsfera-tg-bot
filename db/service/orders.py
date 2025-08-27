@@ -26,7 +26,7 @@ class OrderModel(BaseModel):
     comment: str = ""
     price: Optional[int] = None
     created_at: Optional[datetime] = None
-    accepted: bool
+    accepted: bool = False
 
 def generate_public_id(length: int = 6) -> str:
     first_char = random.choice(string.ascii_uppercase)
@@ -40,7 +40,6 @@ def parse_order(json_string: str, tg_id: int, username: str) -> OrderModel:
         data["created_at"] = datetime.now(timezone.utc)
         data["public_id"] = generate_public_id()
         data["username"] = username
-        data["accepted"] = False
         return OrderModel(**data)
     except (json.JSONDecodeError, ValidationError) as e:
         raise ValueError(f"Invalid order data: {e}")

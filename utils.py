@@ -30,18 +30,18 @@ def format_user_link(order: OrderModel) -> str:
     if order.username:
         return f"@{order.username}"
     
-def format_for_client(order: OrderModel, include_confirmation: bool = False) -> str:
+def format_for_client(order: OrderModel) -> str:
     messengers_str = format_messengers(order)
     
     formatted = (
         f"<b>📅  {convert_date(order.date)} • {order.time}</b>\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
+        f"━━━━━━━━━━━━━━━━\n"
         f"📍  Откуда: <blockquote>{order.from_location}</blockquote>\n"
         f"📍  Куда: <blockquote>{order.to_location}</blockquote>\n\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
+        f"━━━━━━━━━━━━━━━━\n"
         f"👤  Имя: {order.name}\n"
         f"📞  Телефон: {order.phone}{messengers_str}\n\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
+        f"━━━━━━━━━━━━━━━━\n"
         f"👨‍👩‍👧‍👦  Всего пассажиров: <b>{order.adults + order.children}</b>\n"
         f"(из них до 12 лет: <b>{order.children}</b>)\n"
         f"🧳  Багажа: <b>{order.baggage}</b>\n\n"
@@ -53,9 +53,6 @@ def format_for_client(order: OrderModel, include_confirmation: bool = False) -> 
     if order.price:
         formatted += f"━━━━━━━━━━━━━━━━\n💰  <b>Стоимость: {order.price}€</b>"
     
-    if include_confirmation and order.price:
-        formatted += "\n\n💡  <i>После подтверждения водитель свяжется с вами для уточнения деталей.</i>\n\n<b>Подтверждаете заказ?</b>"
-    
     return formatted
 
 def format_for_admin(order: OrderModel, extra_info: str = None) -> str:
@@ -64,14 +61,14 @@ def format_for_admin(order: OrderModel, extra_info: str = None) -> str:
     
     formatted = (
         f"<b>📅  {convert_date(order.date)} • {order.time}</b>\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
+        f"━━━━━━━━━━━━━━━━\n"
         f"📍  Откуда: <blockquote>{order.from_location}</blockquote>\n"
         f"📍  Куда: <blockquote>{order.to_location}</blockquote>\n\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
+        f"━━━━━━━━━━━━━━━━\n"
         f"👤  {user_link}\n"
         f"📝  Имя: {order.name}\n"
         f"📞  Телефон: {order.phone}{messengers_str}\n\n"
-        f"━━━━━━━━━━━━━━━━\n\n"
+        f"━━━━━━━━━━━━━━━━\n"
         f"👨‍👩‍👧‍👦  Всего пассажиров: <b>{order.adults + order.children}</b>\n"
         f"(из них до 12 лет: <b>{order.children}</b>)\n"
         f"🧳  Багажа: <b>{order.baggage}</b>\n\n"
