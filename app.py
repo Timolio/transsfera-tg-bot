@@ -16,7 +16,7 @@ from aiogram.fsm.context import FSMContext
 
 from db.service.orders import parse_order, create_order, update_order, get_order, delete_order, OrderModel
 from utils import format_for_admin, format_for_client, convert_date
-from keyboards import get_main_keyboard, get_price_accept_buttons, get_admin_buttons, get_complete_trip_buttons
+from keyboards import get_main_keyboard, get_price_accept_buttons, get_admin_buttons
 
 load_dotenv()
 
