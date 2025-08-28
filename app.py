@@ -14,7 +14,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
 
-from db.service.orders import parse_order, create_order, update_order, get_order, delete_order, OrderModel
+from db.service.orders import parse_order, create_order, update_order, get_order, delete_order
 from utils import format_for_admin, format_for_client, convert_date
 from keyboards import get_main_keyboard, get_price_accept_buttons, get_admin_buttons
 
@@ -67,7 +67,7 @@ async def receive_price(message: Message, state: FSMContext):
     
     await bot.send_message(
         order.tg_id,
-        f"💎  Цена рассчитана! <b>#{order.public_id}</b>\n\n━━━━━━━━━━━━━━━━\n💰 <b>{price}€</b>\n━━━━━━━━━━━━━━━━\n\n💡  Подтвердите заказ, после чего наш водитель свяжется с вами в течение 15 минут для уточнения деталей",
+        f"💎  Цена рассчитана! <b>#{order.public_id}</b>\n\n━━━━━━━━━━━━━━━━\n💰 <b>{price}€</b>\n━━━━━━━━━━━━━━━━\n\n💡  <b>Подтвердите заказ</b>, после чего наш водитель свяжется с вами в течение 15 минут для уточнения деталей",
         reply_markup=get_price_accept_buttons(order_id)
     )
 
@@ -109,8 +109,7 @@ async def handle_accept_price(callback: CallbackQuery):
     await bot.send_message(
         os.getenv("ADMIN_ID"),
         f"🎊  ПОДТВЕРЖДЁН! <b>#{order.public_id}</b>\n\n✅  Клиент @{order.username} принял цену {order.price}€\n\n"
-        f"{formatted_admin}\n\n#подтверждённые_заказы",
-        reply_markup=get_complete_trip_buttons(order_id=str(order_id))
+        f"{formatted_admin}\n\n#подтверждённые_заказы"
     )
 
     await callback.answer()
