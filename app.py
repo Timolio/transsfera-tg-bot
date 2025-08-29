@@ -37,7 +37,7 @@ async def start_handler(message: Message):
         f"👋 Добро пожаловать, @{message.from_user.username}! Это бот <b>Transsfera</b>. \n\n"
         "Здесь вы можете быстро и удобно заказать трансфер по всему побережью <i>Costa Blanca</i>, "
         "в том числе в аэропорты Аликанте, Валенсии и Барселоны ✈️\n\n"
-        "Введите данные по <b>кнопке внизу</b>  ⬇️⬇️⬇️ , после чего бот рассчитает цену вашей поездки. "
+        "Введите данные по <b>кнопке внизу</b> ⬇️⬇️⬇️, после чего бот рассчитает цену вашей поездки. "
         "Вам останется только подтвердить заказ ✅ и... Приятного пути!"
     )
     logging.info(f"User {message.from_user.id} ({message.from_user.username}) opened the bot")
@@ -189,10 +189,10 @@ async def web_app_handler(message: Message):
     parsed_order = parse_order(data, message.from_user.id, message.from_user.username)
     order_id = await create_order(parsed_order)
     formatted_client = format_for_client(parsed_order)
-    await message.answer(f"🎯  Заказ <b>#{parsed_order.public_id}</b> принят!\n\n⏰  Рассчитываем стоимость...\nОтветим в течение 5 минут\n\n{formatted_client}")
+    await message.answer(f"🎯  Заказ <b>#{parsed_order.public_id}</b> принят!\n\n{formatted_client}\n\n⏰  Рассчитываем стоимость...\nОтветим в течение 5 минут")
     formatted_admin = format_for_admin(parsed_order)
     logging.info(f"New order {order_id}")
-    await bot.send_message(os.getenv("ADMIN_ID"), f"🔥  НОВЫЙ ЗАКАЗ <b>#{parsed_order.public_id}</b>\n\n{formatted_admin}", reply_markup=get_admin_buttons(order_id=str(order_id)), )
+    await bot.send_message(os.getenv("ADMIN_ID"), f"🔥  НОВЫЙ ЗАКАЗ <b>#{parsed_order.public_id}</b>\n\n{formatted_admin}", reply_markup=get_admin_buttons(order_id=str(order_id)))
 
 async def main():
     logging.basicConfig(level=logging.INFO)
